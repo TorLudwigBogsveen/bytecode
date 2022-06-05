@@ -30,6 +30,10 @@ impl InstructionList {
         InstructionList { code: Vec::new() }
     }
 
+    pub fn len(&self) -> usize {
+        self.code.len()
+    }
+
     pub fn push_instruction(&mut self, ins: Instruction) {
         self.code.push(u8::from(ins))
     }
