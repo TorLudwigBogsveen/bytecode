@@ -22,17 +22,33 @@
 pub mod interpreter;
 
 mod tests {
-    use crate::interpreter::{Interpreter, Instruction};
+    use crate::interpreter::{Interpreter, Instruction, InstructionList};
 
 
     #[test]
-    fn t() {
+    fn test_1() {
         let mut int = Interpreter::new(vec![
             u8::from(Instruction::Push), 10, 0, 0, 0,
             u8::from(Instruction::Push), 20, 0, 0, 0, 
             u8::from(Instruction::I32Add), 
             u8::from(Instruction::CompilerCall), 1, 0, 0, 0,
             u8::from(Instruction::Hlt)]);
+        int.run();
+    }
+
+    #[test]
+    fn test_2() {
+        let mut instrs = InstructionList::new();
+        instrs.push_instruction(Instruction::Push);
+        instrs.push_i32_operand(10);
+        instrs.push_instruction(Instruction::Push);
+        instrs.push_i32_operand(20);
+        instrs.push_instruction(Instruction::I32Add);
+        instrs.push_instruction(Instruction::CompilerCall);
+        instrs.push_i32_operand(1);
+        instrs.push_instruction(Instruction::Hlt);
+
+        let mut int = Interpreter::new(instrs.code);
         int.run();
     }
 }

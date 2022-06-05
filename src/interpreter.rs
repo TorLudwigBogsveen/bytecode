@@ -21,6 +21,69 @@
 
 use std::{panic, ops::{Index, IndexMut}, fmt::Display};
 
+pub struct InstructionList {
+    pub code: Vec<u8>,
+}
+
+impl InstructionList {
+    pub fn new() -> InstructionList {
+        InstructionList { code: Vec::new() }
+    }
+
+    pub fn push_instruction(&mut self, ins: Instruction) {
+        self.code.push(u8::from(ins))
+    }
+
+    pub fn push_u8_operand(&mut self, val: u8) {
+        self.code.push(val)
+    }
+
+    pub fn push_u16_operand(&mut self, val: u16) {
+        self.push_u8_operand(val as u8);
+        self.push_u8_operand((val >> 8) as u8);
+    }
+
+    pub fn push_u32_operand(&mut self, val: u32) {
+        self.push_u16_operand(val as u16);
+        self.push_u16_operand((val >> 16) as u16);
+    }
+
+    pub fn push_i32_operand(&mut self, val: i32) {
+        self.push_u32_operand(bytemuck::cast(val))
+    }
+
+    pub fn set_u8_operand(&mut self, val: u8, index: usize) {
+        self.code[index] = val;
+    }
+
+    pub fn set_u16_operand(&mut self, val: u16, index: usize) {
+        self.set_u8_operand(val as u8, index);
+        self.set_u8_operand((val >> 8u32) as u8, index+1);
+    }
+
+    pub fn set_u32_operand(&mut self, val: u32, index: usize) {
+        self.set_u16_operand(val as u16, index);
+        self.set_u16_operand((val >> 16u32) as u16, index+2);
+    }
+
+    pub fn set_i32_operand(&mut self, val: i32, index: usize) {
+        //println!("i32_op:{}", val);
+        self.set_u32_operand(bytemuck::cast(val), index);
+    }
+
+    pub fn get_u8(&self, index: usize) -> u8 {
+        self.code[index]
+    }
+
+    pub fn get_u16(&self, index: usize) -> u16 {
+        self.get_u8(index) as u16 + ((self.get_u8(index + 1) as u16) << 8)
+    }
+
+    pub fn get_u32(&self, index: usize) -> u32 {
+        self.get_u16(index) as u32 + ((self.get_u16(index + 2) as u32) << 16)
+    }
+}
+
 #[repr(u8)]
 #[derive(Clone, Copy, Debug)]
 pub enum CompilerCall {
